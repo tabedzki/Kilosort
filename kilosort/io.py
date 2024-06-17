@@ -429,10 +429,16 @@ class BinaryRWFile:
             assert c == n_chan_bin
             total_samples = n
 
-        self.imin = max(int(tmin*fs), 0)
-        self.imax = total_samples if tmax==np.inf else min(int(tmax*fs), total_samples)
+        #self.imin = max(int(tmin*fs), 0)
+        #self.imax = total_samples if tmax==np.inf else min(int(tmax*fs), total_samples)
+        self.imin = 0
+        self.imax = total_samples*385*5
 
-        self.n_batches = int(np.ceil(self.n_samples / self.NT))
+        self.n_batches = int(np.ceil(self.n_samples / self.NT))# * 385 * 5
+
+        logger.debug(f'Total samples in binary file: {total_samples}.')
+        logger.debug(f'Total samples used: {self.n_samples}.')
+        logger.debug(f'N batches: {self.n_batches}.')
 
         mode = 'w+' if write else 'r'
         # Must use total samples for file shape, otherwise the end of the data
@@ -556,6 +562,8 @@ class BinaryRWFile:
         if self.file is None:
             raise ValueError('Binary file has been closed, data not accessible.')
 
+        ibatch = ibatch % 45
+
         if ibatch==0:
             bstart = self.imin
             bend = self.imin + self.NT + self.nt
@@ -593,7 +601,7 @@ class BinaryRWFile:
                 X[:, self.nt : self.nt+nsamp] = torch.from_numpy(data).to(self.device).float()
                 X[:, :self.nt] = X[:, self.nt : self.nt+1]
                 bstart = self.imin - self.nt
-            elif ibatch == self.n_batches-1:
+            elif ibatch == 44:
                 X[:, :nsamp] = torch.from_numpy(data).to(self.device).float()
                 X[:, nsamp:] = X[:, nsamp-1:nsamp]
                 bend += self.nt
