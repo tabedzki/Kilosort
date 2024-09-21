@@ -7,7 +7,6 @@ import numpy as np
 import torch
 from qtpy import QtCore
 
-#from kilosort.gui.logger import setup_logger
 import kilosort
 from kilosort.run_kilosort import (
     setup_logger, initialize_ops, compute_preprocessing, compute_drift_correction,
@@ -15,8 +14,6 @@ from kilosort.run_kilosort import (
     )
 
 from kilosort.io import save_preprocessing
-
-#logger = setup_logger(__name__)
 
 
 class KiloSortWorker(QtCore.QThread):
@@ -46,7 +43,7 @@ class KiloSortWorker(QtCore.QThread):
             results_dir = self.results_directory
             if not results_dir.exists():
                 results_dir.mkdir(parents=True)
-            
+
             setup_logger(results_dir)
 
             try:

@@ -6,7 +6,10 @@ except DistributionNotFound:
     # package is not installed
     pass
 
+from logging_conf import setup_logging
+setup_logging()
 
 from .utils import PROBE_DIR, DOWNLOADS_DIR
 from .run_kilosort import run_kilosort
 from .parameters import DEFAULT_SETTINGS
+

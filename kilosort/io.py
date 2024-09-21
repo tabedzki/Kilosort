@@ -30,7 +30,7 @@ def find_binary(data_dir: Union[str, os.PathLike]) -> Path:
                 + list(data_dir.glob('*.dat')) + list(data_dir.glob('*.raw'))
     if len(filenames) == 0:
         raise FileNotFoundError(
-            'No binary file found in folder. Expected extensions are:\n'
+            f'No binary file found in {data_dir}. Expected extensions are:\n'
             '*.bin, *.bat, *.dat, or *.raw.'
             )
 
@@ -50,7 +50,7 @@ def find_binary(data_dir: Union[str, os.PathLike]) -> Path:
 
 def load_probe(probe_path):
     """Load a .mat probe file from Kilosort2, or a PRB file and returns a dictionary
-    
+
     adapted from https://github.com/MouseLand/pykilosort/blob/5712cfd2722a20554fa5077dd8699f68508d1b1a/pykilosort/utils.py#L592
 
     """
@@ -69,7 +69,7 @@ def load_probe(probe_path):
         probe['xc'] = []
         probe['yc'] = []
         probe['kcoords'] = []
-        probe['n_chan'] = 0 
+        probe['n_chan'] = 0
         for cg in sorted(metadata['channel_groups']):
             d = metadata['channel_groups'][cg]
             ch = d['channels']
@@ -125,7 +125,7 @@ def load_probe(probe_path):
 
     return probe
 
-  
+
 def save_probe(probe_dict, filepath):
     """Save a probe dictionary to a .json text file.
 
@@ -141,13 +141,13 @@ def save_probe(probe_dict, filepath):
     ------
     RuntimeWarning
         If filepath does not end in '.json'
-    
+
     """
 
     if Path(filepath).suffix != '.json':
         raise RuntimeWarning(
             'Saving json probe to a file whose suffix is not .json. '
-            'kilosort.io.load_probe will not recognize this file.' 
+            'kilosort.io.load_probe will not recognize this file.'
         )
 
     d = probe_dict.copy()
@@ -176,7 +176,7 @@ def save_probe(probe_dict, filepath):
 
 def remove_bad_channels(probe, bad_channels):
     """Creates a new probe dictionary with listed channels (data rows) removed.
-    
+
     Parameters
     ----------
     probe : dict.
@@ -189,7 +189,7 @@ def remove_bad_channels(probe, bad_channels):
     Returns
     -------
     probe : dict.
-    
+
     """
     probe = probe.copy()
 
@@ -247,7 +247,7 @@ def save_to_phy(st, clu, tF, Wall, probe, ops, imin, results_dir=None,
         If True, save a pre-processed copy of the data (including drift
         correction) to `temp_wh.dat` in the results directory and format Phy
         output to use that copy of the data.
-    
+
     Returns
     -------
     results_dir : pathlib.Path.
@@ -396,7 +396,7 @@ def save_to_phy(st, clu, tF, Wall, probe, ops, imin, results_dir=None,
     np.save((results_dir / 'similar_templates.npy'), similar_templates)
     np.save((results_dir / 'templates.npy'), templates)
     np.save((results_dir / 'templates_ind.npy'), templates_ind)
-    
+
     # pc features
     if save_extra_vars:
         # Save tF first since it gets updated in-place
@@ -430,7 +430,7 @@ def save_to_phy(st, clu, tF, Wall, probe, ops, imin, results_dir=None,
                 else:
                     f.write(f'{i}\t{p}\n')
         if stype == 'KSLabel':
-            shutil.copyfile((results_dir / f'cluster_{stype}.tsv'), 
+            shutil.copyfile((results_dir / f'cluster_{stype}.tsv'),
                             (results_dir / f'cluster_group.tsv'))
 
     # params.py
@@ -451,7 +451,7 @@ def save_to_phy(st, clu, tF, Wall, probe, ops, imin, results_dir=None,
         params['hp_filtered'] = False
         params['dat_path'] = f"'{dat_path.resolve().as_posix()}'"
 
-    with open((results_dir / 'params.py'), 'w') as f: 
+    with open((results_dir / 'params.py'), 'w') as f:
         for key in params.keys():
             f.write(f'{key} = {params[key]}\n')
 
@@ -529,7 +529,7 @@ class BinaryRWFile:
 
     supported_dtypes = ['int16', 'uint16', 'int32', 'float32']
 
-    def __init__(self, filename: str, n_chan_bin: int, fs: int = 30000, 
+    def __init__(self, filename: str, n_chan_bin: int, fs: int = 30000,
                  NT: int = 60000, nt: int = 61, nt0min: int = 20,
                  device: torch.device = None, write: bool = False,
                  dtype: str = None, tmin: float = 0.0, tmax: float = np.inf,
@@ -540,7 +540,7 @@ class BinaryRWFile:
         * always assume int16 files *
 
         adapted from https://github.com/MouseLand/suite2p/blob/main/suite2p/io/binary.py
-        
+
         Parameters
         ----------
         filename : str or Path
@@ -556,8 +556,8 @@ class BinaryRWFile:
         self.fs = fs
         self.n_chan_bin = n_chan_bin
         self.filename = filename
-        self.NT = NT 
-        self.nt = nt 
+        self.NT = NT
+        self.nt = nt
         self.nt0min = nt0min
         self.shift = shift
         self.scale = scale
@@ -649,7 +649,7 @@ class BinaryRWFile:
         """
         del(self.file)
         self.file = None
-        
+
     def __enter__(self):
         return self
 
@@ -677,7 +677,7 @@ class BinaryRWFile:
         # Convert back from float to file dtype
         data = data.astype(self.dtype)
         self.file[sample_indices] = data
-        
+
     def __getitem__(self, *items):
         if self.file is None:
             raise ValueError('Binary file has been closed, data not accessible.')
@@ -686,7 +686,7 @@ class BinaryRWFile:
         # Shift indices by minimum sample index.
         sample_indices = self._get_shifted_indices(idx)
         samples = self.file[sample_indices]
-        
+
         if self.dtype == 'uint16':
             # Shift data to +/- 2**15
             samples = samples.astype('float32')
@@ -699,7 +699,7 @@ class BinaryRWFile:
             samples = samples + self.shift
 
         return samples
-    
+
     def _get_shifted_indices(self, idx):
         if not isinstance(idx, tuple): idx = tuple([idx])
         new_idx = []
@@ -779,7 +779,7 @@ class BinaryRWFile:
             return X, inds
         else:
             return X
-        
+
 
 def get_total_samples(filename, n_channels, dtype=np.int16):
     """Count samples in binary file given dtype and number of channels."""
@@ -858,13 +858,13 @@ class BinaryFileGroup:
             d = data[0]
         else:
             d = np.concatenate(data, axis=0)
-    
+
         return d
 
     @property
     def shape(self):
         return self.split_indices[-1], self.n_chans
-    
+
     @staticmethod
     def from_filenames(filenames, n_channels, dtype=np.int16, mode='r'):
         files = []
@@ -873,12 +873,12 @@ class BinaryFileGroup:
             f = np.memmap(name, mode=mode, dtype=dtype,
                           shape=(n_samples, n_channels))
             files.append(f)
-        
+
         return files
 
 
 class BinaryFiltered(BinaryRWFile):
-    def __init__(self, filename: str, n_chan_bin: int, fs: int = 30000, 
+    def __init__(self, filename: str, n_chan_bin: int, fs: int = 30000,
                  NT: int = 60000, nt: int = 61, nt0min: int = 20,
                  chan_map: np.ndarray = None, hp_filter: torch.Tensor = None,
                  whiten_mat: torch.Tensor = None, dshift: torch.Tensor = None,
@@ -889,7 +889,7 @@ class BinaryFiltered(BinaryRWFile):
 
         super().__init__(filename, n_chan_bin, fs, NT, nt, nt0min, device,
                          dtype=dtype, tmin=tmin, tmax=tmax, shift=shift,
-                         scale=scale, file_object=file_object) 
+                         scale=scale, file_object=file_object)
         self.chan_map = chan_map
         self.whiten_mat = whiten_mat
         self.hp_filter = hp_filter
@@ -910,7 +910,7 @@ class BinaryFiltered(BinaryRWFile):
         if self.do_CAR:
             # remove the mean of each channel, and the median across channels
             X = X - torch.median(X, 0)[0]
-    
+
         # high-pass filtering in the Fourier domain (much faster than filtfilt etc)
         if self.hp_filter is not None:
             fwav = fft_highpass(self.hp_filter, NT=X.shape[1])
@@ -941,7 +941,7 @@ class BinaryFiltered(BinaryRWFile):
             warnings.filterwarnings("ignore", message=_torch_warning)
             X = torch.from_numpy(samples.T).to(self.device).float()
         return self.filter(X)
-        
+
     def padded_batch_to_torch(self, ibatch, ops=None, return_inds=False):
         if return_inds:
             X, inds = super().padded_batch_to_torch(ibatch, return_inds=return_inds)
@@ -1032,7 +1032,7 @@ def save_preprocessing(filename, ops, bfile=None, bfile_path=None):
             x2 = batch2[:, :2*nt].cpu().numpy()
             X = np.vstack([x1[np.newaxis,...], x2[np.newaxis,...]])
             y2 = (X*W).sum(axis=0).T
-            
+
             # Write raw data, leaving out padding and first nt values
             y1 = batch1[:, nt*2:-nt].cpu().numpy().T
             z[(i*NT)+(nt) : ((i+1)*NT), chan_map] = (y1*200).astype('int16')
@@ -1087,7 +1087,7 @@ def spikeinterface_to_binary(recording, filepath, data_name='data.bin',
         Maximum number of threads used to execute file i/o.
         Default: min(32, (os.process_cpu_count() or 1) + 4)
         (https://github.com/python/cpython/blob/main/Lib/concurrent/futures/thread.py)
-        
+
     Notes
     -----
     SpikeInterface has its own `recording.save()` method for this purpose
@@ -1095,7 +1095,7 @@ def spikeinterface_to_binary(recording, filepath, data_name='data.bin',
     better control over filepath structure, minimal output, and fewer
     dependencies on file format details. However, for very large files, you
     may want to investigate `recording.save` to speed up data copying.
-    
+
     """
 
     filepath = Path(filepath)
@@ -1186,7 +1186,7 @@ class RecordingExtractorAsArray:
     def __init__(self, recording_extractor):
         """An array-like wrapper for a RecordingExtractor.
 
-        This class is provided to assist with loading data from other file 
+        This class is provided to assist with loading data from other file
         formats besides the raw binary format supported by Kilosort4. We do not
         explicitly support any other file format, nor is SpikeInterface a
         required package for using Kilosort4, so future updates to SpikeInterface
@@ -1251,7 +1251,7 @@ class RecordingExtractorAsArray:
         logger.info(f'dtype: {self.dtype}')
         self.shape = (self.N, self.c)
         logger.info('='*40)
-    
+
 
     def __getitem__(self, *items):
         idx, *crop = items
@@ -1283,13 +1283,13 @@ class RecordingExtractorAsArray:
             channel_ids = [channel_ids]
         else:
             channel_ids = np.arange(self.shape[1])
-        # Index into actual channel ids from recording, which do not have to 
+        # Index into actual channel ids from recording, which do not have to
         # be sequential or start from 0
         channel_ids = self.recording.channel_ids[channel_ids]
 
         samples = self.recording.get_traces(start_frame=i, end_frame=j,
                                             channel_ids=channel_ids)
-        
+
         return samples
 
     def __setitem__(self):

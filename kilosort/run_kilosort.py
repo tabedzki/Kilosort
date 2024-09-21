@@ -4,6 +4,8 @@ import pprint
 import logging
 import warnings
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
 
 import numpy as np
 import torch
@@ -232,8 +234,6 @@ def run_kilosort(settings, probe=None, probe_name=None, filename=None,
     except:
         # This makes sure the full traceback is written to log file.
         logger.exception('Encountered error in `run_kilosort`:')
-        # Annoyingly, this will print the error message twice for console, but
-        # I haven't found a good way around that.
         raise
 
     return ops, st, clu, tF, Wall, similar_templates, \
@@ -300,25 +300,24 @@ def set_files(settings, filename, probe, probe_name,
 
 
 def setup_logger(results_dir):
-    # Create a custom logger
-    logger.setLevel(logging.DEBUG)
+
+    file_handler = logging.FileHandler(results_dir / 'kilosort4.log', mode='w')
+    file_handler.setLevel(logging.DEBUG)
+
+    # Create formatters and add them to the handlers
+    file_formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M')
+    file_handler.setFormatter(file_formatter)
+
+    # Add handlers to the logger
+    logger.addHandler(file_handler)
 
     # Create handlers
+
     file_handler = logging.FileHandler(results_dir / 'kilosort4.log')
     file_handler.setLevel(logging.DEBUG)
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-
-    # Create formatters and add them to handlers
-    file_formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M')
-    file_handler.setFormatter(file_formatter)
-
-    console_formatter = logging.Formatter('%(name)-12s: %(message)s')
-    console_handler.setFormatter(console_formatter)
-
-    # Add handlers to the logger
-    logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
     # Set 3rd party loggers to INFO or above only,

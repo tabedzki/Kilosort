@@ -9,7 +9,7 @@ from kilosort.utils import DOWNLOADS_DIR, download_url_to_file
 # TODO: figure out how to fix margin/padding around tooltip text.
 #       property-margin, margin-right not working as expected.
 _QSS = """
-    QToolTip { 
+    QToolTip {
         color: #aeadac;
         background-color: #35322f;
         border: 1px solid #aeadac;
@@ -22,7 +22,7 @@ def launcher(filename=None):
     kilosort_application.setStyle("Fusion")
     kilosort_application.setPalette(DarkPalette())
     kilosort_application.setStyleSheet(_QSS)
-    
+
     # get icon
     DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
     icon_path = DOWNLOADS_DIR / "logo.png"
@@ -45,7 +45,7 @@ def launcher(filename=None):
     app_icon.addFile(icon_path, QtCore.QSize(48, 48))
     app_icon.addFile(icon_path, QtCore.QSize(64, 64))
     app_icon.addFile(icon_path, QtCore.QSize(256, 256))
-    
+
     kilosort_application.setWindowIcon(app_icon)
 
     pg.setConfigOption("background", "k")
